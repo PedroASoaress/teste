@@ -6,7 +6,7 @@ from azure.storage.blob import BlobServiceClient
 app = Flask(__name__)
 
 # Configuração de Conexão com Azure Storage
-STORAGE_CONNECTION_STRING = os.getenv("AZURE_STORAGE_CONNECTION_STRING") or "<sua-string-de-conexão>"
+STORAGE_CONNECTION_STRING = os.getenv("homologacaowssv1") or "DTHopC3DOj0rn+ixUKwzfJ53UwBKH0p7ZjsajyDV8Rz2jLwQ36zVRWj0mssOtBHzeYbsP+Pujb0O+AStEBPNHQ=="
 CONTAINER_NAME = "teste"
 
 # Função para conectar ao serviço de blob
