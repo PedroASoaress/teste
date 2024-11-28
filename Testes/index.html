@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Azure Blob Viewer</title>
+</head>
+<body>
+    <h1>Azure Blob Viewer</h1>
+    <form action="/read-blob" method="get">
+        <label for="blob_name">Nome do Blob:</label>
+        <input type="text" id="blob_name" name="blob_name" required>
+        <button type="submit">Ler Blob</button>
+    </form>
+    <p><a href="/list-blobs">Listar Blobs</a></p>
+</body>
+</html>
