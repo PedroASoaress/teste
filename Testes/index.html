@@ -1,17 +1,61 @@
 <!DOCTYPE html>
-<html lang="pt">
+<html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Azure Blob Viewer</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Azure Blob Viewer</title>
+<style>
+        /* Estilos gerais */
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        h1 {
+            color: #333;
+        }
+        form {
+            margin-bottom: 20px;
+        }
+        input, button {
+            margin: 5px 0;
+            padding: 5px;
+        }
+        a {
+            color: #0078D4;
+            text-decoration: none;
+        }
+        a:hover {
+            text-decoration: underline;
+        }
+        /* Estilos para mensagens */
+        .error {
+            color: red;
+            font-weight: bold;
+        }
+        .success {
+            color: green;
+            font-weight: bold;
+        }
+</style>
 </head>
 <body>
-    <h1>Azure Blob Viewer</h1>
-    <form action="/read-blob" method="get">
-        <label for="blob_name">Nome do Blob:</label>
-        <input type="text" id="blob_name" name="blob_name" required>
-        <button type="submit">Ler Blob</button>
-    </form>
-    <p><a href="/list-blobs">Listar Blobs</a></p>
-</body>
-</html>
+<h1>Azure Blob Viewer</h1>
+ 
+ 
+<!-- Formulário para leitura de blob -->
+<form action="/read-blob" method="get">
+    <label for="blob_name">Nome do Blob:</label>
+    <input type="text" id="blob_name" name="blob_name" placeholder="Digite o nome do blob" required>
+    <button type="submit">Ler Blob</button>
+</form>
+
+<!-- Link para listar blobs -->
+<p><a href="/list-blobs">Listar Blobs</a></p>
+
+<!-- Exibição de mensagens ou conteúdos -->
+{% if error %}
+    <p class="error">{{ error }}</p>
+{% elif blob_name and content %}
+    <h2>Conteúdo do Blob: {{ blob_name }}</h2>
+    <pre>{{ content }}</pre>
+{% endif %}
