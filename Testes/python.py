@@ -1,63 +1,65 @@
-import os
+from azure.identity import DefaultAzureCredential
+from azure.storage.blob import BlobServiceClient, BlobClient, ContainerClient
+from azure.mgmt.web import WebSiteManagementClient
+from azure.mgmt.resource import ResourceManagementClient
 from flask import Flask, jsonify, render_template, request
-from azure.storage.blob import BlobServiceClient
-
+ 
+ 
 # Configuração da Aplicação Flask
 app = Flask(__name__)
-
-# Configuração de Conexão com Azure Storage
-STORAGE_CONNECTION_STRING = os.getenv("") or ""
-CONTAINER_NAME = "teste"
-
-# Função para conectar ao serviço de blob
-def connect_to_blob_service():
-    try:
-        blob_service_client = BlobServiceClient.from_connection_string(STORAGE_CONNECTION_STRING)
-        return blob_service_client
-    except Exception as e:
-        print(f"Erro ao conectar ao Azure Storage: {e}")
-        return None
-
-# Endpoint: Página inicial
-@app.route("\")
-def home():
-    return render_template("index.html")  # Página HTML para interação (opcional)
-
-# Endpoint: Listar blobs no container
+ 
+# Credenciais definidas diretamente no código
+CONNECTION_STRING = ""
+STORAGE_ACCOUNT_URL = ""
+CONTAINER_NAME = ""
+ 
+SUBSCRIPTION_ID = ""
+RESOURCE_GROUP_NAME = ""
+WEB_APP_NAME = ""
+ 
+# Validação de configuração
+if not STORAGE_ACCOUNT_URL or not CONTAINER_NAME:
+    raise ValueError("As variáveis STORAGE_ACCOUNT_URL e CONTAINER_NAME devem estar configuradas.")
+ 
+if not SUBSCRIPTION_ID or not RESOURCE_GROUP_NAME or not WEB_APP_NAME:
+    raise ValueError("As variáveis SUBSCRIPTION_ID, RESOURCE_GROUP_NAME e WEB_APP_NAME devem estar configuradas.")
+ 
+# Inicializar credenciais e clientes do Azure
+credential = DefaultAzureCredential()
+ 
+# Blob Service Client
+blob_service_client = BlobServiceClient.from_connection_string(CONNECTION_STRING)
+container_client = blob_service_client.get_container_client(CONTAINER_NAME)
+ 
+# Web Site Management Client
+web_client = WebSiteManagementClient(credential, SUBSCRIPTION_ID)
+ 
+ 
 @app.route("/list-blobs", methods=["GET"])
 def list_blobs():
-    blob_service_client = connect_to_blob_service()
-    if not blob_service_client:
-        return jsonify({"error": "Não foi possível conectar ao Azure Storage"}), 500
-    
     try:
-        container_client = blob_service_client.get_container_client(CONTAINER_NAME)
         blobs = container_client.list_blobs()
-        blob_list = [{"name": blob.name, "size": blob.size, "last_modified": blob.last_modified} for blob in blobs]
-        return jsonify(blob_list)  # Retorna a lista de blobs como JSON
+        blob_list = [blob.name for blob in blobs]
+        return render_template("index.html", blobs=blob_list)
     except Exception as e:
-        return jsonify({"error": f"Erro ao listar blobs: {e}"}), 500
-
-# Endpoint: Ler conteúdo de um blob específico
-@app.route("/read-blob", methods=["GET"])
-def read_blob():
-    blob_name = request.args.get("blob_name")  # Nome do blob fornecido como parâmetro na URL
-    if not blob_name:
-        return jsonify({"error": "Parâmetro 'blob_name' é obrigatório"}), 400
-
-    blob_service_client = connect_to_blob_service()
-    if not blob_service_client:
-        return jsonify({"error": "Não foi possível conectar ao Azure Storage"}), 500
-
-    try:
-        container_client = blob_service_client.get_container_client(CONTAINER_NAME)
-        blob_client = container_client.get_blob_client(blob_name)
-        blob_data = blob_client.download_blob().readall()
-        return jsonify({"blob_name": blob_name, "content": blob_data.decode("utf-8")})  # Retorna o conteúdo do blob
-    except Exception as e:
-        return jsonify({"error": f"Erro ao ler o blob '{blob_name}': {e}"}), 500
-
+        return render_template("index.html", error=f"Erro ao listar blobs: {e}")
+   
+    # Verificação inicial: listar blobs
+print("Blobs no contêiner:")
+for blob in container_client.list_blobs():
+    print(blob.name)
+   
+ 
+# Baixar o blob para um arquivo local
+blob_client = blob_service_client.get_blob_client(container="teste", blob="Teste.txt")
+ 
+blob_data = blob_client.download_blob().readall()
+print(blob_data.decode('utf-8'))
+# Página inicial
+@app.route("/")
+def home():
+    return render_template("index.html")  # Página de interação (opcional)
+ 
 # Executar a aplicação Flask
 if __name__ == "__main__":
     app.run(debug=True)
-
